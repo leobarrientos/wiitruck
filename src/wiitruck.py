@@ -16,6 +16,9 @@ time.sleep(1)
 # This code attempts to connect to your Wiimote and if it fails the program quits
 try:
   wii=cwiid.Wiimote()
+  
+  #turn on led to show connected 
+  wii.led = 1
 except RuntimeError:
   print "Cannot connect to your Wiimote. Run again and make sure you are holding buttons 1 + 2!"
   quit()
@@ -26,14 +29,20 @@ print 'Press PLUS and MINUS together to disconnect and quit.\n'
 
 time.sleep(3)
 
-wii.rpt_mode = cwiid.RPT_BTN
+#Now if we want to read values from the Wiimote we must turn on the reporting mode. First let's have it just report button presses
+wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
 
 gpio17 = LED(17)
+gpio17.off()
 
+print 'Ready!!!'
 while True:
 
   buttons = wii.state['buttons']
-
+  
+  #works!
+  #print((wii.state['acc'][1]-125))
+  
   # Detects whether + and - are held down and if they are it quits the program
   if (buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0):
     print '\nClosing connection ...'
@@ -70,11 +79,13 @@ while True:
 
   if (buttons & cwiid.BTN_A):
     print 'Button A pressed -- move fordward'
-    gpio17.source = cwiid.BTN_A
+    #gpio17.toggle()
+    gpio17.on()
     time.sleep(button_delay)
 
   if (buttons & cwiid.BTN_B):
-    print 'Button B pressed -- move backward'
+    gpio17.off()
+    print 'Button B pressed -- Stop ' 
     time.sleep(button_delay)
 
   if (buttons & cwiid.BTN_HOME):
