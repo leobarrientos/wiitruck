@@ -7,6 +7,8 @@
 
 import cwiid, time
 from gpiozero import LED
+from gpiozero import RGBLED
+from colorzero import Color
 
 button_delay = 0.1
 
@@ -35,6 +37,12 @@ wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
 gpio17 = LED(17)
 gpio17.off()
 
+gpio18 = LED(18)
+gpio18.off()
+
+rgbLed = RGBLED(16,20,21)
+rgbLed.color = Color('yellow')
+
 print 'Ready!!!'
 wii.rumble = 1
 time.sleep(0.2)
@@ -48,15 +56,20 @@ while True:
   #print((wii.state['acc'][1]-130))
   #print((wii.state['acc']))
   #print(buttons)
-  
+  #print (wii.state) 
+
   driverWheel = wii.state['acc'][1]-130
 
   if (driverWheel >= -2 and driverWheel <= 2):
-    print 'center'
+    rgbLed.color = Color('yellow')
+    #print 'center'
   elif (driverWheel >= 2):
-    print 'left'
+    #print 'left'
+    rgbLed.color = Color('red')
   elif (driverWheel <=-2):
-    print 'right'
+    #print 'right'
+    rgbLed.color = Color('blue')
+
 
   # Detects whether + and - are held down and if they are it quits the program
   if (buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0):
@@ -93,17 +106,28 @@ while True:
     time.sleep(button_delay)
 
   if (buttons & cwiid.BTN_A):
-    print 'Button A pressed -- move fordward'
-    #gpio17.toggle()
+    #print 'Button A pressed -- move fordward'
     gpio17.on()
+    gpio18.off()
     time.sleep(button_delay)
   else:
     gpio17.off()
+    gpio18.off()
 
   if (buttons & cwiid.BTN_B):
+    #print 'Button B pressed -- move backward ' 
     gpio17.off()
-    print 'Button B pressed -- Stop ' 
+    gpio18.on()
     time.sleep(button_delay)
+  else:
+    gpio17.off()
+    gpio18.off()
+
+ 
+  if (buttons & cwiid.BTN_A) & (buttons  & cwiid.BTN_B):
+    print 'Stop'
+    gpio17.off()
+    gpio18.off()
 
   if (buttons & cwiid.BTN_HOME):
     wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
