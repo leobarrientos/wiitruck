@@ -36,19 +36,34 @@ gpio17 = LED(17)
 gpio17.off()
 
 print 'Ready!!!'
+wii.rumble = 1
+time.sleep(0.2)
+wii.rumble = 0
+         
 while True:
 
   buttons = wii.state['buttons']
   
   #works!
-  #print((wii.state['acc'][1]-125))
+  #print((wii.state['acc'][1]-130))
+  #print((wii.state['acc']))
+  #print(buttons)
   
+  driverWheel = wii.state['acc'][1]-130
+
+  if (driverWheel >= -2 and driverWheel <= 2):
+    print 'center'
+  elif (driverWheel >= 2):
+    print 'left'
+  elif (driverWheel <=-2):
+    print 'right'
+
   # Detects whether + and - are held down and if they are it quits the program
   if (buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0):
     print '\nClosing connection ...'
     # NOTE: This is how you RUMBLE the Wiimote
     wii.rumble = 1
-    time.sleep(1)
+    time.sleep(0.3)
     wii.rumble = 0
     exit(wii)
 
@@ -82,6 +97,8 @@ while True:
     #gpio17.toggle()
     gpio17.on()
     time.sleep(button_delay)
+  else:
+    gpio17.off()
 
   if (buttons & cwiid.BTN_B):
     gpio17.off()
