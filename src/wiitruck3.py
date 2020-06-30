@@ -5,10 +5,11 @@
 
 # Coded by The Raspberry Pi Guy. Work based on some of Matt Hawkins's!
 
-import cwiid, time
+import cwiid
+import time
+from colorzero import Color
 from gpiozero import LED
 from gpiozero import RGBLED
-from colorzero import Color
 
 
 def wii_remote_conn():
@@ -30,85 +31,85 @@ def wii_remote_conn():
         quit()
 
 
-def go(wii, gpio17, button_delay):
-    # Now if we want to read values from the Wiimote we must turn on the reporting mode. First let's have it just report button presses
-    wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
-
-    while True:
-        buttons = wii.state['buttons']
-
-    # works!
-    # print((wii.state['acc'][1]-130))
-    # print((wii.state['acc']))
-    # print(buttons)
-    # print (wii.state)
-
-    driverWheel = wii.state['acc'][1] - 130
-
-    if (driverWheel >= -2 and driverWheel <= 2):
-        rgbLed.color = Color('yellow')
-        # print 'center'
-    elif (driverWheel >= 2):
-        # print 'left'
-        rgbLed.color = Color('red')
-    elif (driverWheel <= -2):
-        # print 'right'
-        rgbLed.color = Color('blue')
-
-    if (buttons & cwiid.BTN_A):
-        # print 'Button A pressed -- move fordward'
-        gpio17.on()
-        gpio18.off()
-        time.sleep(button_delay)
-    else:
-        gpio17.off()
-        gpio18.off()
-
-    if (buttons & cwiid.BTN_B):
-        # print 'Button B pressed -- move backward '
-        gpio17.off()
-        gpio18.on()
-        time.sleep(button_delay)
-    else:
-        gpio17.off()
-        gpio18.off()
-
-    # Detects whether + and - are held down and if they are it quits the program
-    if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
-        print '\nClosing connection ...'
-        # NOTE: This is how you RUMBLE the Wiimote
-        wii.rumble = 1
-        time.sleep(0.3)
-        wii.rumble = 0
-        exit(wii)
-
-    # Detects whether + and - are held down and if they are it quits the program
-    if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
-        print '\nNot permited ...'
-        # NOTE: This is how you RUMBLE the Wiimote
-        wii.rumble = 1
-        time.sleep(0.3)
-        wii.rumble = 0
-
-def main():
-    wii = wii_remote_conn()
-    time.sleep(3)
-
+def go(wii):
+    button_delay = 0.1
     gpio17 = LED(17)
     gpio17.off()
 
     gpio18 = LED(18)
     gpio18.off()
 
-    rgbLed = RGBLED(16, 20, 21)
-    rgbLed.color = Color('yellow')
+    directionled = RGBLED(16, 20, 21)
+    directionled.color = Color('yellow')
+
+    # Now if we want to read values from the Wiimote we must turn on the reporting mode. First let's have it just report button presses
+    wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
+
+    while True:
+        buttons = wii.state['buttons']
+        # works!
+        # print((wii.state['acc'][1]-130))
+        # print((wii.state['acc']))
+        # print(buttons)
+        # print (wii.state)
+
+        driverWheel = wii.state['acc'][1] - 130
+
+        if (driverWheel >= -2 and driverWheel <= 2):
+            directionled.color = Color('yellow')
+            # print 'center'
+        elif (driverWheel >= 2):
+            # print 'left'
+            directionled.color = Color('red')
+        elif (driverWheel <= -2):
+            # print 'right'
+            directionled.color = Color('blue')
+
+        if (buttons & cwiid.BTN_A):
+            # print 'Button A pressed -- move fordward'
+            gpio17.on()
+            gpio18.off()
+            time.sleep(button_delay)
+        else:
+            gpio17.off()
+            gpio18.off()
+
+        if (buttons & cwiid.BTN_B):
+            # print 'Button B pressed -- move backward '
+            gpio17.off()
+            gpio18.on()
+            time.sleep(button_delay)
+        else:
+            gpio17.off()
+            gpio18.off()
+
+        # Detects whether + and - are held down and if they are it quits the program
+        if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
+            print '\nClosing connection ...'
+            # NOTE: This is how you RUMBLE the Wiimote
+            wii.rumble = 1
+            time.sleep(0.3)
+            wii.rumble = 0
+            exit(wii)
+
+        # Detects whether + and - are held down and if they are it quits the program
+        if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
+            print '\nNot permited ...'
+            # NOTE: This is how you RUMBLE the Wiimote
+            wii.rumble = 1
+            time.sleep(0.3)
+            wii.rumble = 0
+
+
+def main():
+    wii = wii_remote_conn()
 
     wii.rumble = 1
     time.sleep(0.2)
     wii.rumble = 0
 
     print 'Ready to go!!!'
-    go(wii, gpio17, button_delay)
+    go(wii)
 
 
 if __name__ == "__main__":
