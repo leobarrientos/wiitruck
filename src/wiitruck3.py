@@ -7,6 +7,8 @@
 
 import cwiid, time
 from gpiozero import LED
+from gpiozero import RGBLED
+from colorzero import Color
 
 
 def wii_remote_conn():
