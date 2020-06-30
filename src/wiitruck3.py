@@ -29,7 +29,6 @@ def wii_remote_conn():
 
 
 def go(wii, gpio17, button_delay):
-
     # Now if we want to read values from the Wiimote we must turn on the reporting mode. First let's have it just report button presses
     wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
 
@@ -72,16 +71,21 @@ def go(wii, gpio17, button_delay):
             exit(wii)
 
 
-wii = wii_remote_conn()
-time.sleep(3)
+def main():
+    wii = wii_remote_conn()
+    time.sleep(3)
 
-gpio17 = LED(17)
-button_delay = 0.1
-gpio17.off()
+    gpio17 = LED(17)
+    button_delay = 0.1
+    gpio17.off()
 
-wii.rumble = 1
-time.sleep(0.2)
-wii.rumble = 0
+    wii.rumble = 1
+    time.sleep(0.2)
+    wii.rumble = 0
 
-print 'Ready to go!!!'
-go(wii, gpio17, button_delay)
+    print 'Ready to go!!!'
+    go(wii, gpio17, button_delay)
+
+
+if __name__ == "__main__":
+    main()
