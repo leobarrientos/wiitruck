@@ -30,16 +30,17 @@ def wii_remote_conn():
 
 def go(wii):
     button_delay = 0.1
-    gpio17 = LED(17)
-    gpio17.off()
 
+    # define gpios
+    gpio17 = LED(17)
     gpio18 = LED(18)
+
+    # set off to all gpios
+    gpio17.off()
     gpio18.off()
 
-    directionled = RGBLED(16, 20, 21)
-    directionled.color = Color('yellow')
-
-    # Now if we want to read values from the Wiimote we must turn on the reporting mode. First let's have it just report button presses
+    # Now if we want to read values from the Wiimote we must turn on the reporting mode.
+    # First let's have it just report button presses
     wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
 
     while True:
@@ -50,35 +51,32 @@ def go(wii):
         # print(buttons)
         # print (wii.state)
 
-        driverWheel = wii.state['acc'][1] - 130
+        direction_control(wii)
 
-        if (driverWheel >= -2 and driverWheel <= 2):
-            directionled.color = Color('yellow')
-            # print 'center'
-        elif (driverWheel >= 2):
-            # print 'left'
-            directionled.color = Color('red')
-        elif (driverWheel <= -2):
-            # print 'right'
-            directionled.color = Color('blue')
-
-        if (buttons & cwiid.BTN_A):
-            # print 'Button A pressed -- move fordward'
-            gpio17.on()
+        # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
+        if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
+            print '\nNot permited ... and Stop!'
+            gpio17.off()
             gpio18.off()
             time.sleep(button_delay)
         else:
-            gpio17.off()
-            gpio18.off()
+            if (buttons & cwiid.BTN_A):
+                # print 'Button A pressed -- move fordward'
+                gpio17.on()
+                gpio18.off()
+                time.sleep(button_delay)
+            else:
+                gpio17.off()
+                gpio18.off()
 
-        if (buttons & cwiid.BTN_B):
-            # print 'Button B pressed -- move backward '
-            gpio17.off()
-            gpio18.on()
-            time.sleep(button_delay)
-        else:
-            gpio17.off()
-            gpio18.off()
+            if (buttons & cwiid.BTN_B):
+                # print 'Button B pressed -- move backward '
+                gpio17.off()
+                gpio18.on()
+                time.sleep(button_delay)
+            else:
+                gpio17.off()
+                gpio18.off()
 
         # Detects whether + and - are held down and if they are it quits the program
         if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
@@ -89,15 +87,27 @@ def go(wii):
             wii.rumble = 0
             exit(wii)
 
-        # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
-        if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
-            print '\nNot permited ... and Stop!'
-            gpio17.off()
-            gpio18.off()
+
+def direction_control(wii):
+    # direction led indicator definitions
+    directionled = RGBLED(16, 20, 21)
+    directionled.color = Color('yellow')
+
+    driver_wheel = wii.state['acc'][1] - 130
+    if -2 <= driver_wheel <= 2:
+        directionled.color = Color('yellow')
+        # print 'center'
+    elif driver_wheel >= 2:
+        # print 'left'
+        directionled.color = Color('red')
+    elif driver_wheel <= -2:
+        # print 'right'
+        directionled.color = Color('blue')
 
 
 def main():
     wii = wii_remote_conn()
+    time.sleep(3)
 
     wii.rumble = 1
     time.sleep(0.2)
