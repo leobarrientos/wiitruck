@@ -6,7 +6,6 @@
 # Coded by The Raspberry Pi Guy. Work based on some of Matt Hawkins's!
 
 import cwiid, time
-import self as self
 from gpiozero import LED
 
 
@@ -73,18 +72,16 @@ def go(wii, gpio17, button_delay):
             exit(wii)
 
 
-def main():
+wii = wii_remote_conn()
+time.sleep(3)
 
-    wii = wii_remote_conn()
-    time.sleep(3)
+gpio17 = LED(17)
+button_delay = 0.1
+gpio17.off()
 
-    gpio17 = LED(17)
-    button_delay = 0.1
-    gpio17.off()
+wii.rumble = 1
+time.sleep(0.2)
+wii.rumble = 0
 
-    wii.rumble = 1
-    time.sleep(0.2)
-    wii.rumble = 0
-
-    print 'Ready to go!!!'
-    go(wii, gpio17, button_delay)
+print 'Ready to go!!!'
+go(wii, gpio17, button_delay)
