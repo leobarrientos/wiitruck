@@ -39,6 +39,10 @@ def go(wii):
     gpio17.off()
     gpio18.off()
 
+    # direction led indicator definitions
+    directionled = RGBLED(16, 20, 21)
+    directionled.color = Color('yellow')
+
     # Now if we want to read values from the Wiimote we must turn on the reporting mode.
     # First let's have it just report button presses
     wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
@@ -51,7 +55,7 @@ def go(wii):
         # print(buttons)
         # print (wii.state)
 
-        direction_control(wii)
+        direction_control(wii, directionled)
 
         # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
         if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
@@ -88,10 +92,7 @@ def go(wii):
             exit(wii)
 
 
-def direction_control(wii):
-    # direction led indicator definitions
-    directionled = RGBLED(16, 20, 21)
-    directionled.color = Color('yellow')
+def direction_control(wii, directionled):
 
     driver_wheel = wii.state['acc'][1] - 130
     if -2 <= driver_wheel <= 2:
