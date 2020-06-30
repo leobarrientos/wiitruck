@@ -1,9 +1,6 @@
 # This program utilises the cwiid Python library in order to get input over bluetooth from a wiimote.
-# The following lines of code demonstrate many of the features realted to wiimotes, such as capturing button presses
-# and rumbling the controller.
-# I have managed to map the home button to the accelerometer - simply hold it and values will appear!
-
-# Coded by The Raspberry Pi Guy. Work based on some of Matt Hawkins's!
+# WiiTruck is a script to control a old remote truck
+# Code by leobarrientos at gmail dot com. Work based on some of Matt Hawkins's! and The Raspberry Pi Guy"
 
 import cwiid
 import time
@@ -92,13 +89,11 @@ def go(wii):
             wii.rumble = 0
             exit(wii)
 
-        # Detects whether + and - are held down and if they are it quits the program
+        # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
         if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
-            print '\nNot permited ...'
-            # NOTE: This is how you RUMBLE the Wiimote
-            wii.rumble = 1
-            time.sleep(0.3)
-            wii.rumble = 0
+            print '\nNot permited ... and Stop!'
+            gpio17.off()
+            gpio18.off()
 
 
 def main():
