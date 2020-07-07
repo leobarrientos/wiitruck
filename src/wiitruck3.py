@@ -14,17 +14,22 @@ BUTTON_DELAY = 0.1
 
 def servo(buttons, my_servo, value):
     """
-    Controling servo with right&left command
+    Controlling servo with right&left command
     """
+
     # wii control
     if buttons & cwiid.BTN_LEFT:
         print('Left pressed')
+        value = value + 1
         value2 = (float(value) - 10) / 10
         my_servo.value = value2
         time.sleep(BUTTON_DELAY)
 
     if buttons & cwiid.BTN_RIGHT:
-        print('Left pressed')
+        print('Right pressed')
+        value = value - 1
+        value2 = (float(value) - 10) / 10
+        my_servo.value = value2
         time.sleep(BUTTON_DELAY)
 
     if buttons & cwiid.BTN_UP:
@@ -57,7 +62,7 @@ def wii_remote_conn():
 
 
 def permitted_bottons(buttons):
-    if buttons - cwiid.BTN_A - cwiid.BTN_B != 0:
+    if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
         raise Exception('You cant move fordward and backward at the same time')
 
 
@@ -71,15 +76,15 @@ def go(wii):
     gpio18.off()
 
     # direction led indicator definitions
-    directionled = RGBLED(16, 20, 21)
-    directionled.color = Color('yellow')
+    direction_led = RGBLED(16, 20, 21)
+    direction_led.color = Color('yellow')
 
     # Now if we want to read values from the Wiimote we must turn on the reporting mode.
     # First let's have it just report button presses
     wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
 
     # Servo Control
-    my_gpio = 27
+    servo_gpio = 27
 
     # Min and Max pulse widths converted into milliseconds
     # To increase range of movement:
@@ -87,12 +92,12 @@ def go(wii):
     #   decrease minPW from default of 1.0
     # Change myCorrection using increments of 0.05 and
     # check the value works with your servo.
-    my_correction = 0.45
-    max_pw = (2.0 + my_correction) / 1000
-    min_pw = (1.0 - my_correction) / 1000
+    servo_correction = 0.45
+    servo_max_pw = (2.0 + servo_correction) / 1000
+    servo_min_pw = (1.0 - servo_correction) / 1000
 
     value = 0
-    my_servo: Servo = Servo(my_gpio, min_pulse_width=min_pw, max_pulse_width=max_pw)
+    my_servo = Servo(servo_gpio, min_pulse_width=servo_min_pw, max_pulse_width=servo_max_pw)
     my_servo.value = value
 
     while True:
@@ -103,7 +108,7 @@ def go(wii):
         # print(buttons)
         # print (wii.state)
 
-        direction_control(wii, directionled)
+        direction_control(wii, direction_led)
 
         # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
         try:
