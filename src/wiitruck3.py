@@ -5,6 +5,7 @@
 import cwiid
 import time
 import configparser
+import os
 from colorzero import Color
 from gpiozero import LED
 from gpiozero import RGBLED
@@ -175,9 +176,13 @@ def direction_control(wii, direction_led):
 
 def main():
 
+    thisfolder = os.path.dirname(os.path.abspath(__file__))
+    initfile = os.path.join(thisfolder, 'config.cfg')
+    # print thisfolder
+
     config = configparser.RawConfigParser()
-    config.read('config.cfg')
-    print(config.get('GPIOS', 'pin_1_motor', raw=False))
+    config.read(initfile)
+    print(config.get('GPIOS', 'pin_1_motor'))
 
     wii = wii_remote_conn()
     time.sleep(3)
