@@ -4,10 +4,12 @@
 
 import cwiid
 import time
+import configparser
 from colorzero import Color
 from gpiozero import LED
 from gpiozero import RGBLED
 from gpiozero import Servo
+
 
 BUTTON_DELAY = 0.1
 
@@ -33,8 +35,8 @@ def servo(buttons, my_servo, value):
         time.sleep(BUTTON_DELAY)
 
     if buttons & cwiid.BTN_UP:
-        print('Up pressed')
-        my_servo.value = 0
+        print('Up pressed... servo centered')
+        my_servo.mid()
 
     # if buttons & cwiid.BTN_DOWN:
     #    print 'Down pressed'
@@ -172,6 +174,11 @@ def direction_control(wii, direction_led):
 
 
 def main():
+
+    config = configparser.RawConfigParser()
+    config.read('config.cfg')
+    print(config.get('GPIOS', 'pin_1_motor', raw=False))
+
     wii = wii_remote_conn()
     time.sleep(3)
 
