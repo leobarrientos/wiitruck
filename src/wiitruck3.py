@@ -4,33 +4,72 @@
 
 import cwiid
 import time
+import configparser
+import os
 from colorzero import Color
 from gpiozero import LED
 from gpiozero import RGBLED
+from gpiozero import Servo
+
+
+BUTTON_DELAY = 0.1
+
+
+def servo(buttons, my_servo, value):
+    """
+    Controlling servo with right&left command
+    """
+
+    # wii control
+    if buttons & cwiid.BTN_LEFT:
+        print('Left pressed')
+        value = value + 1
+        value2 = (float(value) - 10) / 10
+        my_servo.value = value2
+        time.sleep(BUTTON_DELAY)
+
+    if buttons & cwiid.BTN_RIGHT:
+        print('Right pressed')
+        value = value - 1
+        value2 = (float(value) - 10) / 10
+        my_servo.value = value2
+        time.sleep(BUTTON_DELAY)
+
+    if buttons & cwiid.BTN_UP:
+        print('Up pressed... servo centered')
+        my_servo.mid()
+
+    # if buttons & cwiid.BTN_DOWN:
+    #    print 'Down pressed'
+    #    time.sleep(BUTTON_DELAY)
+    return value
 
 
 def wii_remote_conn():
-    print 'Please press buttons 1 + 2 on your Wiimote now ...'
+    print('Please press buttons 1 + 2 on your Wiimote now ...')
     time.sleep(1)
 
     # This code attempts to connect to your Wiimote and if it fails the program quits
     try:
         wii = cwiid.Wiimote()
-        print 'Wiimote connection established!\n'
-        print 'Go ahead and press some buttons\n'
-        print 'Press PLUS and MINUS together to disconnect and quit.\n'
+        print('Wiimote connection established!\n')
+        print('Go ahead and press some buttons\n')
+        print('Press PLUS and MINUS together to disconnect and quit.\n')
 
         # turn on led to show connected
         wii.led = 1
         return wii
     except RuntimeError:
-        print "Cannot connect to your Wiimote. Run again and make sure you are holding buttons 1 + 2!"
+        print("Cannot connect to your Wiimote. Run again and make sure you are holding buttons 1 + 2!")
         quit()
 
 
-def go(wii):
-    button_delay = 0.1
+def permitted_bottons(buttons):
+    if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
+        raise Exception('You cant move fordward and backward at the same time')
 
+
+def go(wii):
     # define gpios
     gpio17 = LED(17)
     gpio18 = LED(18)
@@ -40,12 +79,29 @@ def go(wii):
     gpio18.off()
 
     # direction led indicator definitions
-    directionled = RGBLED(16, 20, 21)
-    directionled.color = Color('yellow')
+    direction_led = RGBLED(16, 20, 21)
+    direction_led.color = Color('yellow')
 
     # Now if we want to read values from the Wiimote we must turn on the reporting mode.
     # First let's have it just report button presses
     wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
+
+    # Servo Control
+    servo_gpio = 27
+
+    # Min and Max pulse widths converted into milliseconds
+    # To increase range of movement:
+    #   increase maxPW from default of 2.0
+    #   decrease minPW from default of 1.0
+    # Change myCorrection using increments of 0.05 and
+    # check the value works with your servo.
+    servo_correction = 0.45
+    servo_max_pw = (2.0 + servo_correction) / 1000
+    servo_min_pw = (1.0 - servo_correction) / 1000
+
+    value = 0
+    my_servo = Servo(servo_gpio, min_pulse_width=servo_min_pw, max_pulse_width=servo_max_pw)
+    my_servo.value = value
 
     while True:
         buttons = wii.state['buttons']
@@ -55,58 +111,79 @@ def go(wii):
         # print(buttons)
         # print (wii.state)
 
-        direction_control(wii, directionled)
+        direction_control(wii, direction_led)
 
         # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
-        if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
-            print '\nNot permited ... and Stop!'
+        try:
+            permitted_bottons(buttons)
+            detect_fordward_movement(buttons, gpio17, gpio18)
+            detect_backward_movement(buttons, gpio17, gpio18)
+            value = servo(buttons, my_servo, value)
+        except Exception as error:
+            print(error)
             gpio17.off()
             gpio18.off()
-            time.sleep(button_delay)
-        else:
-            if (buttons & cwiid.BTN_A):
-                # print 'Button A pressed -- move fordward'
-                gpio17.on()
-                gpio18.off()
-                time.sleep(button_delay)
-            else:
-                gpio17.off()
-                gpio18.off()
+            time.sleep(BUTTON_DELAY)
 
-            if (buttons & cwiid.BTN_B):
-                # print 'Button B pressed -- move backward '
-                gpio17.off()
-                gpio18.on()
-                time.sleep(button_delay)
-            else:
-                gpio17.off()
-                gpio18.off()
-
-        # Detects whether + and - are held down and if they are it quits the program
-        if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
-            print '\nClosing connection ...'
-            # NOTE: This is how you RUMBLE the Wiimote
-            wii.rumble = 1
-            time.sleep(0.3)
-            wii.rumble = 0
-            exit(wii)
+        truck_off(buttons, wii)
 
 
-def direction_control(wii, directionled):
+def detect_fordward_movement(buttons, gpio17, gpio18):
+    if buttons & cwiid.BTN_A:
+        # print 'Button A pressed -- move fordward'
+        gpio17.on()
+        gpio18.off()
+        time.sleep(BUTTON_DELAY)
+    else:
+        gpio17.off()
+        gpio18.off()
 
+
+def detect_backward_movement(buttons, gpio17, gpio18):
+    if buttons & cwiid.BTN_B:
+        # print 'Button B pressed -- move backward '
+        gpio17.off()
+        gpio18.on()
+        time.sleep(BUTTON_DELAY)
+    else:
+        gpio17.off()
+        gpio18.off()
+
+
+def truck_off(buttons, wii):
+    # Detects whether + and - are held down and if they are it quits the program
+    if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
+        print('\nClosing connection ...')
+        # NOTE: This is how you RUMBLE the Wiimote
+        wii.rumble = 1
+        time.sleep(0.3)
+        wii.rumble = 0
+        exit(wii)
+
+
+def direction_control(wii, direction_led):
     driver_wheel = wii.state['acc'][1] - 130
     if -2 <= driver_wheel <= 2:
-        directionled.color = Color('yellow')
+        direction_led.color = Color('yellow')
         # print 'center'
     elif driver_wheel >= 2:
         # print 'left'
-        directionled.color = Color('red')
+        direction_led.color = Color('red')
     elif driver_wheel <= -2:
         # print 'right'
-        directionled.color = Color('blue')
+        direction_led.color = Color('blue')
 
 
 def main():
+
+    thisfolder = os.path.dirname(os.path.abspath(__file__))
+    initfile = os.path.join(thisfolder, 'config.cfg')
+    # print thisfolder
+
+    config = configparser.RawConfigParser()
+    config.read(initfile)
+    print(config.get('GPIOS', 'pin_1_motor'))
+
     wii = wii_remote_conn()
     time.sleep(3)
 
@@ -114,7 +191,7 @@ def main():
     time.sleep(0.2)
     wii.rumble = 0
 
-    print 'Ready to go!!!'
+    print('Ready to go!!!')
     go(wii)
 
 
