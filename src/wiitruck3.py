@@ -134,16 +134,13 @@ def direction_control(engine, direction_led):
     driver_wheel = engine.wii.state['acc'][1] - 130
     if -2 <= driver_wheel <= 2:
         direction_led.color = Color('yellow')
-        # engine.steeting().straight()
-        # print 'center'
+        engine.steering.straight()
     elif driver_wheel >= 2:
-        # print 'left'
         direction_led.color = Color('red')
-        # engine.steeting().turn_left()
+        engine.steering.turn_left()
     elif driver_wheel <= -2:
-        # print 'right'
         direction_led.color = Color('blue')
-        # engine.steeting().turn_right()
+        engine.steering.turn_right()
 
 
 def main():
