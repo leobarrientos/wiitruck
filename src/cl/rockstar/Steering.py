@@ -3,7 +3,7 @@ from gpiozero import LED
 
 class Steering:
 
-    def __init__(self, left: LED, right: LED):
+    def __init__(self, left, right):
         self.left = left
         self.right = right
 

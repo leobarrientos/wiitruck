@@ -3,7 +3,7 @@ from gpiozero import LED
 
 class Emotor:
 
-    def __init__(self, fordward: LED, backward: LED):
+    def __init__(self, fordward, backward):
         self.fordward = fordward
         self.backward = backward
 

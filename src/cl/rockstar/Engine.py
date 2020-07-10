@@ -1,14 +1,14 @@
 from gpiozero import LED
 
-from src.cl.rockstar.Emotor import Emotor
-from src.cl.rockstar.Steering import Steering
+from cl.rockstar.Emotor import Emotor
+from cl.rockstar.Steering import Steering
 import cwiid
 import time
 
 
 class Engine:
 
-    def __init__(self, e_motor: Emotor, steering: Steering):
+    def __init__(self, e_motor, steering):
         self.wii = None
         self.e_motor = e_motor
         self.steering = steering

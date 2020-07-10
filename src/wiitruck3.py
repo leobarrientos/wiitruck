@@ -11,7 +11,7 @@ from gpiozero import LED
 from gpiozero import RGBLED
 from gpiozero import Servo
 
-from src.cl.rockstar.Engine import Engine
+from cl.rockstar.Engine import Engine
 
 BUTTON_DELAY = 0.1
 
@@ -164,7 +164,7 @@ def main():
     config.read(init_file)
     print(config.get('GPIOS', 'pin_1_motor'))
 
-    engine = Engine()
+    engine = Engine(None, None)
     wii = engine.start()
 
     print('Ready to go!!!')
