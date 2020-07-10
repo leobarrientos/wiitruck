@@ -8,10 +8,10 @@ import time
 
 class Engine:
 
-    def __init__(self, e_motor, steering):
-        self.wii = None
-        self.e_motor = e_motor
-        self.steering = steering
+    def __init__(self, p_emotor, p_steering):
+        self.wii = None 
+        self.emotor = p_emotor
+        self.steering = p_steering
 
     def shutdown(self):
         print('\nClosing connection ...')
@@ -20,7 +20,7 @@ class Engine:
         time.sleep(0.3)
         self.wii.rumble = 0
         self.wii.led = 0
-        return self
+        return self.wii
 
     def start(self):
         print('Encendido!!!')

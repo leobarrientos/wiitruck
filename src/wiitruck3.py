@@ -94,15 +94,15 @@ def go(engine):
         # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
         try:
             permitted_bottons(buttons)
-            detect_fordward_movement(buttons, engine.e_motor)
-            detect_backward_movement(buttons, engine.e_motor)
+            detect_fordward_movement(buttons, engine.emotor)
+            detect_backward_movement(buttons, engine.emotor)
             value = servo(buttons, my_servo, value)
         except Exception as error:
             print(error)
-            engine.emotor.shutdown()
+            engine.emotor.stop()
             time.sleep(BUTTON_DELAY)
 
-        truck_off(buttons, wii)
+        truck_off(buttons, engine)
 
 
 def detect_fordward_movement(buttons, emotor):
@@ -111,7 +111,7 @@ def detect_fordward_movement(buttons, emotor):
         emotor.move_fordward()
         time.sleep(BUTTON_DELAY)
     else:
-        emotor.shutdown()
+        emotor.stop()
 
 
 def detect_backward_movement(buttons, emotor):
@@ -120,30 +120,30 @@ def detect_backward_movement(buttons, emotor):
         emotor.move_backward()
         time.sleep(BUTTON_DELAY)
     else:
-        emotor.shutdown()
+        emotor.stop()
 
 
 def truck_off(buttons, engine):
     # Detects whether + and - are held down and if they are it quits the program
     if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
-        engine.shutdown()
-        exit(engine.wii)
+        wii = engine.shutdown()
+        exit(0)
 
 
 def direction_control(engine, direction_led):
     driver_wheel = engine.wii.state['acc'][1] - 130
     if -2 <= driver_wheel <= 2:
         direction_led.color = Color('yellow')
-        engine.steeting.straight()
+        # engine.steeting().straight()
         # print 'center'
     elif driver_wheel >= 2:
         # print 'left'
         direction_led.color = Color('red')
-        engine.steeting.turn_left()
+        # engine.steeting().turn_left()
     elif driver_wheel <= -2:
         # print 'right'
         direction_led.color = Color('blue')
-        engine.steeting.turn_right()
+        # engine.steeting().turn_right()
 
 
 def main():
@@ -154,14 +154,17 @@ def main():
 
     config = configparser.ConfigParser()
     config.read(init_file)
-    print(config.get('GPIOS', 'pin_1_motor_ffd'))
-
+    print(config.get('GPIOS', 'pin_emotor_ffd'))
+    print(config.get('GPIOS', 'pin_emotor_rwd'))
+    print(config.get('GPIOS', 'pin_steering_left'))
+    print(config.get('GPIOS', 'pin_steering_right'))
+    
     # define gpios
-    ffw = LED(config.get('GPIOS', 'pin_1_motor_ffd'))
-    rwd = LED(config.get('GPIOS', 'pin_1_motor_rwd'))
+    ffw = LED(config.get('GPIOS', 'pin_emotor_ffd'))
+    rwd = LED(config.get('GPIOS', 'pin_emotor_rwd'))
 
-    left = LED(config.get('GPIOS', 'pin_1_steering_left'))
-    right = LED(config.get('GPIOS', 'pin_1_steering_right'))
+    left = LED(config.get('GPIOS', 'pin_steering_left'))
+    right = LED(config.get('GPIOS', 'pin_steering_right'))
 
     e_motor = Emotor(ffw, rwd)
     steering = Steering(left, right)
