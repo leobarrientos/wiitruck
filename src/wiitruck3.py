@@ -55,10 +55,6 @@ def permitted_bottons(buttons):
 
 def go(engine):
 
-    # direction led indicator definitions
-    direction_led = RGBLED(16, 20, 21)
-    direction_led.color = Color('yellow')
-
     wii = engine.wii
     # Now if we want to read values from the Wiimote we must turn on the reporting mode.
     # First let's have it just report button presses
@@ -89,7 +85,7 @@ def go(engine):
         # print(buttons)
         # print (wii.state)
 
-        direction_control(engine, direction_led)
+        direction_control(engine)
 
         # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
         try:
@@ -130,16 +126,13 @@ def truck_off(buttons, engine):
         exit(0)
 
 
-def direction_control(engine, direction_led):
+def direction_control(engine):
     driver_wheel = engine.wii.state['acc'][1] - 130
     if -2 <= driver_wheel <= 2:
-        direction_led.color = Color('yellow')
         engine.steering.straight()
     elif driver_wheel >= 2:
-        direction_led.color = Color('red')
         engine.steering.turn_left()
     elif driver_wheel <= -2:
-        direction_led.color = Color('blue')
         engine.steering.turn_right()
 
 
