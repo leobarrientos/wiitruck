@@ -1,5 +1,5 @@
 import unittest
-from Emotor import Emotor
+from cl.rockstar.Emotor import Emotor
 from gpiozero import Device, LED
 from gpiozero.pins.mock import MockFactory
 

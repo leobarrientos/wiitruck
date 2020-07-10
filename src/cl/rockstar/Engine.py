@@ -13,14 +13,14 @@ class Engine:
         self.e_motor = e_motor
         self.steering = steering
 
-    def stop(self, wii):
+    def shutdown(self):
         print('\nClosing connection ...')
         # NOTE: This is how you RUMBLE the Wiimote
-        wii.rumble = 1
+        self.wii.rumble = 1
         time.sleep(0.3)
-        wii.rumble = 0
-        wii.led = 0
-        return wii
+        self.wii.rumble = 0
+        self.wii.led = 0
+        return self
 
     def start(self):
         print('Encendido!!!')
@@ -42,8 +42,7 @@ class Engine:
             wii.rumble = 0
 
             self.wii = wii
-            return self.wii
+            return self
         except RuntimeError:
             print("Cannot connect to your Wiimote. Run again and make sure you are holding buttons 1 + 2!")
             return RuntimeError
-

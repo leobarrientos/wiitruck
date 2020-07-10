@@ -1,5 +1,5 @@
 import unittest
-from Steering import Steering
+from cl.rockstar.Steering import Steering
 from gpiozero import Device, LED
 from gpiozero.pins.mock import MockFactory
 

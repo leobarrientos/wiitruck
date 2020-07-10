@@ -4,6 +4,8 @@ from gpiozero import LED
 class Emotor:
 
     def __init__(self, fordward, backward):
+        fordward.off()
+        backward.off()
         self.fordward = fordward
         self.backward = backward
 
@@ -21,3 +23,8 @@ class Emotor:
         self.fordward.off()
         self.backward.on()
         return self.backward
+
+    def stop(self):
+        self.fordward.off()
+        self.backward.off()
+        return self

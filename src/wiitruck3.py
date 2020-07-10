@@ -12,6 +12,8 @@ from gpiozero import RGBLED
 from gpiozero import Servo
 
 from cl.rockstar.Engine import Engine
+from cl.rockstar.Emotor import Emotor
+from cl.rockstar.Steering import Steering
 
 BUTTON_DELAY = 0.1
 
@@ -52,13 +54,6 @@ def permitted_bottons(buttons):
 
 
 def go(engine):
-    # define gpios
-    gpio17 = LED(17)
-    gpio18 = LED(18)
-
-    # set off to all gpios
-    gpio17.off()
-    gpio18.off()
 
     # direction led indicator definitions
     direction_led = RGBLED(16, 20, 21)
@@ -94,64 +89,61 @@ def go(engine):
         # print(buttons)
         # print (wii.state)
 
-        direction_control(wii, direction_led)
+        direction_control(engine, direction_led)
 
         # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
         try:
             permitted_bottons(buttons)
-            detect_fordward_movement(buttons, gpio17, gpio18)
-            detect_backward_movement(buttons, gpio17, gpio18)
+            detect_fordward_movement(buttons, engine.e_motor)
+            detect_backward_movement(buttons, engine.e_motor)
             value = servo(buttons, my_servo, value)
         except Exception as error:
             print(error)
-            gpio17.off()
-            gpio18.off()
+            engine.emotor.shutdown()
             time.sleep(BUTTON_DELAY)
 
         truck_off(buttons, wii)
 
 
-def detect_fordward_movement(buttons, gpio17, gpio18):
+def detect_fordward_movement(buttons, emotor):
     if buttons & cwiid.BTN_A:
         # print 'Button A pressed -- move fordward'
-        gpio17.on()
-        gpio18.off()
+        emotor.move_fordward()
         time.sleep(BUTTON_DELAY)
     else:
-        gpio17.off()
-        gpio18.off()
+        emotor.shutdown()
 
 
-def detect_backward_movement(buttons, gpio17, gpio18):
+def detect_backward_movement(buttons, emotor):
     if buttons & cwiid.BTN_B:
         # print 'Button B pressed -- move backward '
-        gpio17.off()
-        gpio18.on()
+        emotor.move_backward()
         time.sleep(BUTTON_DELAY)
     else:
-        gpio17.off()
-        gpio18.off()
+        emotor.shutdown()
 
 
-def truck_off(buttons, wii):
+def truck_off(buttons, engine):
     # Detects whether + and - are held down and if they are it quits the program
     if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
+        engine.shutdown()
+        exit(engine.wii)
 
 
-        exit(wii)
-
-
-def direction_control(wii, direction_led):
-    driver_wheel = wii.state['acc'][1] - 130
+def direction_control(engine, direction_led):
+    driver_wheel = engine.wii.state['acc'][1] - 130
     if -2 <= driver_wheel <= 2:
         direction_led.color = Color('yellow')
+        engine.steeting.straight()
         # print 'center'
     elif driver_wheel >= 2:
         # print 'left'
         direction_led.color = Color('red')
+        engine.steeting.turn_left()
     elif driver_wheel <= -2:
         # print 'right'
         direction_led.color = Color('blue')
+        engine.steeting.turn_right()
 
 
 def main():
@@ -162,10 +154,20 @@ def main():
 
     config = configparser.ConfigParser()
     config.read(init_file)
-    print(config.get('GPIOS', 'pin_1_motor'))
+    print(config.get('GPIOS', 'pin_1_motor_ffd'))
 
-    engine = Engine(None, None)
-    wii = engine.start()
+    # define gpios
+    ffw = LED(config.get('GPIOS', 'pin_1_motor_ffd'))
+    rwd = LED(config.get('GPIOS', 'pin_1_motor_rwd'))
+
+    left = LED(config.get('GPIOS', 'pin_1_steering_left'))
+    right = LED(config.get('GPIOS', 'pin_1_steering_right'))
+
+    e_motor = Emotor(ffw, rwd)
+    steering = Steering(left, right)
+
+    engine = Engine(e_motor, steering)
+    engine.start()
 
     print('Ready to go!!!')
     go(engine)
