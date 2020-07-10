@@ -1,16 +1,23 @@
-from src.cl.rockstar.Engine import Engine
+from gpiozero import LED
 
 
-def move_fordward():
-    pass
+class Emotor:
 
-
-def move_backward():
-    pass
-
-
-class Emotor(Engine):
-
-    def __init__(self, fordward, backward):
+    def __init__(self, fordward: LED, backward: LED):
         self.fordward = fordward
         self.backward = backward
+
+    def status(self):
+        print(self.fordward.value)
+        val = self.fordward.value
+        return val
+
+    def move_fordward(self):
+        self.fordward.on()
+        self.backward.off()
+        return self.fordward
+
+    def move_backward(self):
+        self.fordward.off()
+        self.backward.on()
+        return self.backward

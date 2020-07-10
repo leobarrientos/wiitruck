@@ -9,34 +9,41 @@ class TestBasicos(unittest.TestCase):
     Device.pin_factory = MockFactory()
 
     def test_right(self):
-        with LED(20) as led20, LED(21) as led21:
-            steering = Steering(led20, led21)
-            self.assertEqual(led21, steering.right)
+        with LED(20) as left, LED(21) as right:
+            steering = Steering(left, right)
+            self.assertEqual(right, steering.right)
 
     def test_left(self):
-        with LED(20) as led20, LED(21) as led21:
-            steering = Steering(led20, led21)
-            self.assertEqual(led20, steering.left)
+        with LED(20) as left, LED(21) as right:
+            steering = Steering(left, right)
+            self.assertEqual(left, steering.left)
 
     def test_get_status(self):
-        with LED(20) as led20, LED(21) as led21:
-            steering = Steering(led20, led21)
-            self.assertEqual(0, led20.value)
-
-            self.assertEqual(0, steering.status())
-
-    def test_turn_left(self):
-        with LED(20) as led20, LED(21) as led21:
-            steering = Steering(led20, led21)
-            self.assertEqual(True, steering.turn_left())
-
-    def test_turn_right(self):
-        with LED(20) as led20, LED(21) as led21:
-            steering = Steering(led20, led21)
-            self.assertEqual(True, steering.turn_right())
+        with LED(20) as left, LED(21) as right:
+            steering = Steering(left, right)
+            left.on()
+            self.assertEqual(1, left.value)
+            self.assertEqual(1, steering.status())
 
     def test_straight(self):
-        with LED(20) as led20, LED(21) as led21:
-            steering = Steering(led20, led21)
+        with LED(20) as left, LED(21) as right:
+            steering = Steering(left, right)
+            left.on()
+            right.off()
             self.assertEqual(True, steering.straight())
+            self.assertEqual(0, left.value)
+
+    def test_turn_left(self):
+        with LED(20) as left, LED(21) as right:
+            steering = Steering(left, right)
+            right.off()
+            left.on()
+            self.assertEqual(left.is_active, steering.turn_left().is_active)
+
+    def test_turn_right(self):
+        with LED(20) as left, LED(21) as right:
+            steering = Steering(left, right)
+            left.off()
+            right.on()
+            self.assertEqual(right.is_active, steering.turn_right().is_active)
 

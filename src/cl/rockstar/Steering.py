@@ -15,14 +15,14 @@ class Steering:
     def turn_left(self):
         self.left.on()
         self.right.off()
-        return True
+        return self.left
 
     def turn_right(self):
         self.left.off()
         self.right.on()
-        return True
+        return self.right
 
-    def turn_straight(self):
+    def straight(self):
         self.left.off()
         self.right.off()
         return True

@@ -11,6 +11,7 @@ from gpiozero import LED
 from gpiozero import RGBLED
 from gpiozero import Servo
 
+from src.cl.rockstar.Engine import Engine
 
 BUTTON_DELAY = 0.1
 
@@ -45,31 +46,12 @@ def servo(buttons, my_servo, value):
     return value
 
 
-def wii_remote_conn():
-    print('Please press buttons 1 + 2 on your Wiimote now ...')
-    time.sleep(1)
-
-    # This code attempts to connect to your Wiimote and if it fails the program quits
-    try:
-        wii = cwiid.Wiimote()
-        print('Wiimote connection established!\n')
-        print('Go ahead and press some buttons\n')
-        print('Press PLUS and MINUS together to disconnect and quit.\n')
-
-        # turn on led to show connected
-        wii.led = 1
-        return wii
-    except RuntimeError:
-        print("Cannot connect to your Wiimote. Run again and make sure you are holding buttons 1 + 2!")
-        quit()
-
-
 def permitted_bottons(buttons):
     if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
         raise Exception('You cant move fordward and backward at the same time')
 
 
-def go(wii):
+def go(engine):
     # define gpios
     gpio17 = LED(17)
     gpio18 = LED(18)
@@ -82,6 +64,7 @@ def go(wii):
     direction_led = RGBLED(16, 20, 21)
     direction_led.color = Color('yellow')
 
+    wii = engine.wii
     # Now if we want to read values from the Wiimote we must turn on the reporting mode.
     # First let's have it just report button presses
     wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
@@ -153,11 +136,8 @@ def detect_backward_movement(buttons, gpio17, gpio18):
 def truck_off(buttons, wii):
     # Detects whether + and - are held down and if they are it quits the program
     if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
-        print('\nClosing connection ...')
-        # NOTE: This is how you RUMBLE the Wiimote
-        wii.rumble = 1
-        time.sleep(0.3)
-        wii.rumble = 0
+
+
         exit(wii)
 
 
@@ -176,23 +156,19 @@ def direction_control(wii, direction_led):
 
 def main():
 
-    thisfolder = os.path.dirname(os.path.abspath(__file__))
-    initfile = os.path.join(thisfolder, 'config.cfg')
-    # print thisfolder
+    this_folder = os.path.dirname(os.path.abspath(__file__))
+    init_file = os.path.join(this_folder, 'config.cfg')
+    # print this_folder
 
-    config = configparser.RawConfigParser()
-    config.read(initfile)
+    config = configparser.ConfigParser()
+    config.read(init_file)
     print(config.get('GPIOS', 'pin_1_motor'))
 
-    wii = wii_remote_conn()
-    time.sleep(3)
-
-    wii.rumble = 1
-    time.sleep(0.2)
-    wii.rumble = 0
+    engine = Engine()
+    wii = engine.start()
 
     print('Ready to go!!!')
-    go(wii)
+    go(engine)
 
 
 if __name__ == "__main__":
