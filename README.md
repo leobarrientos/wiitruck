@@ -1,7 +1,14 @@
 # wiitruck v1.0.0
 
+Develop in python with POO.
+
 ## Hardware
-Puente H L298n
+* Raspberry Pi 3B+
+* Puente H L298n
+* Wii Mote (https://es.wikipedia.org/wiki/Wiimote)
+* protoboard
+* 4 leds
+* Somes wires
 
 ## References
 * https://pimylifeup.com/raspberry-pi-wiimote-controllers/
