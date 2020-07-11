@@ -15,4 +15,6 @@ Develop in python with POO.
 * https://gpiozero.readthedocs.io/en/stable/api_output.html
 * https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/robot/wiimote
 * https://www.w3schools.com/python/python_conditions.asp
+* https://gist.github.com/sloria/7001839
+* http://www.hipchong.com/product.php?id=25&c1id=19&page=1
 /
