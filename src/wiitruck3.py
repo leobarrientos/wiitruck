@@ -91,6 +91,11 @@ def main():
     left = LED(config.get('GPIOS', 'pin_steering_left'))
     right = LED(config.get('GPIOS', 'pin_steering_right'))
 
+    # blink front lights
+    lights = LED(config.get('GPIOS', 'pin_lights'))
+    lights.off()
+    lights.blink()
+
     e_motor = Emotor(ffw, rwd)
     steering = Steering(left, right)
 
@@ -98,6 +103,7 @@ def main():
     engine.start()
 
     print('Ready to go!!!')
+    lights.on()
     go(engine)
 
 
