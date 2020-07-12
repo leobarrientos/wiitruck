@@ -93,17 +93,14 @@ def main():
 
     # blink front lights
     lights = LED(config.get('GPIOS', 'pin_lights'))
-    lights.off()
-    lights.blink()
 
     e_motor = Emotor(ffw, rwd)
     steering = Steering(left, right)
 
-    engine = Engine(e_motor, steering)
+    engine = Engine(e_motor, steering, lights)
     engine.start()
 
     print('Ready to go!!!')
-    lights.on()
     go(engine)
 
 

@@ -8,10 +8,11 @@ import time
 
 class Engine:
 
-    def __init__(self, p_emotor, p_steering):
-        self.wii = None 
+    def __init__(self, p_emotor, p_steering, p_lights):
+        self.wii = None
         self.emotor = p_emotor
         self.steering = p_steering
+        self.lights = p_lights
 
     def shutdown(self):
         print('\nClosing connection ...')
@@ -20,10 +21,13 @@ class Engine:
         time.sleep(0.3)
         self.wii.rumble = 0
         self.wii.led = 0
+        self.lights.off()
         return self.wii
 
     def start(self):
-        print('Encendido!!!')
+        print('Encendiendo!!!')
+        self.lights.blink()
+
         print('Please press buttons 1 + 2 on your Wiimote now ...')
         time.sleep(1)
 
@@ -41,9 +45,12 @@ class Engine:
             time.sleep(0.2)
             wii.rumble = 0
 
+            self.lights.on()
+
             self.wii = wii
             return self
         except RuntimeError:
             print("Cannot connect to your Wiimote. Run again and make sure you are holding buttons 1 + 2!")
+            self.lights.off()
             exit(-1)
             return RuntimeError
