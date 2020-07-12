@@ -19,8 +19,8 @@ BUTTON_DELAY = 0.1
 
 
 def movement_not_permitted(buttons):
-    if buttons - cwiid.BTN_A - cwiid.BTN_B == 0:
-        raise Exception('You cant move fordward and backward at the same time')
+        if buttons - cwiid.BTN_2 - cwiid.BTN_B == 0:
+            raise Exception('You cant move fordward and backward at the same time')
 
 
 def go(engine):
@@ -39,14 +39,14 @@ def go(engine):
         except Exception as error:
             print(error)
             engine.emotor.stop()
-            wii = engine.shutdown()
+           # wii = engine.shutdown()
             time.sleep(BUTTON_DELAY)
-            exit(-1)
+           # exit(-1)
         truck_off(wii_buttons, engine)
 
 
 def go_fordward(buttons, emotor):
-    if buttons & cwiid.BTN_A:
+    if buttons & cwiid.BTN_2:
         emotor.move_fordward()
         time.sleep(BUTTON_DELAY)
     else:

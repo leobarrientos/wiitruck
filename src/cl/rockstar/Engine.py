@@ -45,4 +45,5 @@ class Engine:
             return self
         except RuntimeError:
             print("Cannot connect to your Wiimote. Run again and make sure you are holding buttons 1 + 2!")
+            exit(-1)
             return RuntimeError
