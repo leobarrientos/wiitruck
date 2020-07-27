@@ -6,14 +6,13 @@ import cwiid
 import time
 import configparser
 import os
-from colorzero import Color
 from gpiozero import LED
-from gpiozero import RGBLED
-from gpiozero import Servo
 
 from cl.rockstar.Engine import Engine
 from cl.rockstar.Emotor import Emotor
 from cl.rockstar.Steering import Steering
+from flask import Flask
+app = Flask(__name__)
 
 BUTTON_DELAY = 0.1
 
@@ -64,7 +63,7 @@ def go_backward(buttons, emotor):
 def truck_off(buttons, engine):
     # Detects whether + and - are held down and if they are it quits the program
     if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
-        wii = engine.shutdown()
+        engine.shutdown()
         exit(0)
 
 
@@ -78,7 +77,8 @@ def steering_control(engine):
         engine.steering.turn_right()
 
 
-def main():
+@app.route('/on')
+def on():
     this_folder = os.path.dirname(os.path.abspath(__file__))
     init_file = os.path.join(this_folder, 'config.cfg')
     config = configparser.ConfigParser()
@@ -104,5 +104,10 @@ def main():
     go(engine)
 
 
+@app.route('/')
+def hello_world():
+    return 'Hello World! - WiiTruck!!! --> go to http://192.168.100.36//on !!'
+
+
 if __name__ == "__main__":
-    main()
+    app.run(host='0.0.0.0', port=80)
