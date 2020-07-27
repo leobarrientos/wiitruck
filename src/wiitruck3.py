@@ -27,14 +27,18 @@ def go(engine):
     # Now if we want to read values from the Wiimote we must turn on the reporting mode.
     # First let's have it just report button presses
     wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
+
+    engine.steering.servo.value = 0
+
     while True:
         wii_buttons = wii.state['buttons']
-        steering_control(engine)
+        # steering_control(engine)
         # Detects whether BTN_A and BTN_B are held down and if they are it turn off the motors
         try:
             movement_not_permitted(wii_buttons)
             go_fordward(wii_buttons, engine.emotor)
             go_backward(wii_buttons, engine.emotor)
+            value = servo(wii_buttons, engine.steering.servo, value)
         except Exception as error:
             print(error)
             engine.emotor.stop()
@@ -65,6 +69,36 @@ def truck_off(buttons, engine):
     if buttons - cwiid.BTN_PLUS - cwiid.BTN_MINUS == 0:
         engine.shutdown()
         exit(0)
+
+
+def servo(buttons, my_servo, value):
+    """
+    Controlling servo with right&left command
+    """
+
+    # wii control
+    if buttons & cwiid.BTN_LEFT:
+        print('Left pressed')
+        value = value + 1
+        value2 = (float(value) - 10) / 10
+        my_servo.value = value2
+        time.sleep(BUTTON_DELAY)
+
+    if buttons & cwiid.BTN_RIGHT:
+        print('Right pressed')
+        value = value - 1
+        value2 = (float(value) - 10) / 10
+        my_servo.value = value2
+        time.sleep(BUTTON_DELAY)
+
+    if buttons & cwiid.BTN_UP:
+        print('Up pressed... servo centered')
+        my_servo.mid()
+
+    # if buttons & cwiid.BTN_DOWN:
+    #    print 'Down pressed'
+    #    time.sleep(BUTTON_DELAY)
+    return value
 
 
 def steering_control(engine):
