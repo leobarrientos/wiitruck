@@ -1,1 +1,4 @@
 Flask==0.12.3
+cwiid
+gpiozero
+configparser

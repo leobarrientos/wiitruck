@@ -6,20 +6,20 @@ import cwiid
 import time
 import configparser
 import os
-from gpiozero import LED
+from gpiozero import LED, Servo, Device
 
 from cl.rockstar.Engine import Engine
 from cl.rockstar.Emotor import Emotor
 from cl.rockstar.Steering import Steering
 from flask import Flask
-app = Flask(__name__)
+from gpiozero.pins.native import NativeFactory
 
 BUTTON_DELAY = 0.1
 
 
 def movement_not_permitted(buttons):
-        if buttons - cwiid.BTN_2 - cwiid.BTN_B == 0:
-            raise Exception('You cant move fordward and backward at the same time')
+    if buttons - cwiid.BTN_2 - cwiid.BTN_B == 0:
+        raise Exception('You cant move fordward and backward at the same time')
 
 
 def go(engine):
@@ -38,9 +38,9 @@ def go(engine):
         except Exception as error:
             print(error)
             engine.emotor.stop()
-           # wii = engine.shutdown()
+            # wii = engine.shutdown()
             time.sleep(BUTTON_DELAY)
-           # exit(-1)
+        # exit(-1)
         truck_off(wii_buttons, engine)
 
 
@@ -72,36 +72,40 @@ def steering_control(engine):
     if -2 <= driver_wheel <= 2:
         engine.steering.straight()
     elif driver_wheel >= 2:
-        engine.steering.turn_left()
+        engine.steering.turn_left(driver_wheel)
     elif driver_wheel <= -2:
-        engine.steering.turn_right()
+        engine.steering.turn_right(driver_wheel)
+
+
+app = Flask(__name__)
 
 
 @app.route('/on')
 def on():
+
     this_folder = os.path.dirname(os.path.abspath(__file__))
     init_file = os.path.join(this_folder, 'config.cfg')
     config = configparser.ConfigParser()
     config.read(init_file)
-    
+
     # define gpios
     ffw = LED(config.get('GPIOS', 'pin_emotor_ffd'))
     rwd = LED(config.get('GPIOS', 'pin_emotor_rwd'))
 
-    left = LED(config.get('GPIOS', 'pin_steering_left'))
-    right = LED(config.get('GPIOS', 'pin_steering_right'))
+    servo = Servo(config.get('GPIOS', 'pin_steering_servo'), min_pulse_width=5/10000, max_pulse_width=25/10000)
 
     # blink front lights
     lights = LED(config.get('GPIOS', 'pin_lights'))
 
     e_motor = Emotor(ffw, rwd)
-    steering = Steering(left, right)
+    steering = Steering(servo)
 
     engine = Engine(e_motor, steering, lights)
     engine.start()
 
     print('Ready to go!!!')
     go(engine)
+    return "OK"
 
 
 @app.route('/')
