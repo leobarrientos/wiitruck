@@ -24,7 +24,7 @@
 from gpiozero import Servo
 from time import sleep
 
-myGPIO=27
+myGPIO=19
 
 # Min and Max pulse widths converted into milliseconds
 # To increase range of movement:

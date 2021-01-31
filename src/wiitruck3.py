@@ -29,6 +29,7 @@ def go(engine):
     wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_ACC
 
     engine.steering.servo.value = 0
+    value=0
 
     while True:
         wii_buttons = wii.state['buttons']
@@ -77,22 +78,25 @@ def servo(buttons, my_servo, value):
     """
 
     # wii control
-    if buttons & cwiid.BTN_LEFT:
-        print('Left pressed')
+    if buttons & cwiid.BTN_UP:
         value = value + 1
         value2 = (float(value) - 10) / 10
-        my_servo.value = value2
-        time.sleep(BUTTON_DELAY)
+        value2 = -0.25
+        if -0.3 <= value2 < 0: 
+            my_servo.value = value2
+            print('Left pressed' + str(value2))
+            time.sleep(BUTTON_DELAY)
 
-    if buttons & cwiid.BTN_RIGHT:
-        print('Right pressed')
+    if buttons & cwiid.BTN_DOWN:
         value = value - 1
         value2 = (float(value) - 10) / 10
-        my_servo.value = value2
-        time.sleep(BUTTON_DELAY)
+        value2 = 0.25
+        if 0 < value2 <= 0.3:
+            my_servo.value = value2
+            print('Right pressed' + str(value2))
+            time.sleep(BUTTON_DELAY)
 
-    if buttons & cwiid.BTN_UP:
-        print('Up pressed... servo centered')
+    if buttons & cwiid.BTN_RIGHT:
         my_servo.mid()
 
     # if buttons & cwiid.BTN_DOWN:
@@ -148,4 +152,5 @@ def hello_world():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
+    #app.run(host='0.0.0.0', port=80)
+    on()
